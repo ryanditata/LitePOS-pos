@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PrintController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -31,9 +32,7 @@ Route::prefix('order')->group(function () {
 Route::POST('/print', [PrintController::class, 'index'])->name('print.index');
 
 Route::prefix('admin')->middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('admin/dashboard/index');
-    })->name('admin.dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     // Resource route for CategoryController
     Route::resource('categories', CategoryController::class);

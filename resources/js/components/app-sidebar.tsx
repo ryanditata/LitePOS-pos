@@ -18,7 +18,7 @@ const mainNavItems: NavItem[] = [
         icon: ShoppingCart,
     },
     {
-        title: 'Foods & Drinks',
+        title: 'Products',
         href: '/admin/products',
         icon: Utensils,
     },

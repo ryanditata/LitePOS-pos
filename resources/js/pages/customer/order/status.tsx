@@ -326,7 +326,7 @@ export default function OrderStatus({ order: initialOrder }: Props) {
                                 Simpan halaman ini sebagai bukti pesanan Anda. Tunjukkan kepada kasir saat mengambil pesanan.
                             </p>
                             {order.status === 'completed' && (
-                                <p className="mt-2 text-sm font-medium text-green-600">✅ Pesanan siap diambil di kasir</p>
+                                <p className="mt-2 text-sm font-medium text-green-600">Pesanan siap diambil di kasir</p>
                             )}
                         </CardContent>
                     </Card>
