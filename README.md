@@ -120,7 +120,7 @@ The application will be available at `http://localhost:5173/`
 
 ```env
 # Application
-APP_NAME=Kasirku
+APP_NAME=LitePOS
 APP_URL=http://localhost:8000
 
 # Database
@@ -152,7 +152,7 @@ npm run types
 ## 📁 Project Structure
 
 ```
-kasirku/
+litepos/
 ├── app/
 │   ├── Http/Controllers/        # Laravel controllers
 │   ├── Models/                  # Eloquent models

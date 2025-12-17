@@ -87,6 +87,7 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'photos' => 'nullable|array',
             'photos.*' => 'image|max:5120', // 5MB max per image
+            'stock' => 'required|integer|min:0',
         ]);
 
         // Create the product
@@ -94,6 +95,7 @@ class ProductController extends Controller
             'name' => $request->name,
             'category_id' => $request->category_id,
             'price' => $request->price,
+            'stock' => $request->stock,
         ]);
 
         // Handle photo uploads
@@ -143,6 +145,7 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'photos' => 'nullable|array',
             'photos.*' => 'image|max:5120', // 5MB max per image
+            'stock' => 'required|integer|min:0',
             'remove_photos' => 'nullable|array',
             'remove_photos.*' => 'exists:product_photos,id',
         ]);
@@ -152,6 +155,7 @@ class ProductController extends Controller
             'name' => $request->name,
             'category_id' => $request->category_id,
             'price' => $request->price,
+            'stock' => $request->stock,
         ]);
 
         // Handle photo removal

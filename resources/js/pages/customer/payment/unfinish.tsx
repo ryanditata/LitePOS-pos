@@ -14,7 +14,7 @@ export default function PaymentUnfinish() {
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-background p-4">
-            <Head title="Pembayaran Belum Selesai - Kasirku" />
+            <Head title="Pembayaran Belum Selesai - LitePOS" />
 
             <Card className="w-full max-w-md text-center">
                 <CardHeader>

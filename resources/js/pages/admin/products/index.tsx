@@ -34,6 +34,7 @@ interface Product {
     name: string;
     category_id: number;
     price: number;
+    stock: number | '';
     created_at: string;
     updated_at: string;
     category?: Category;
@@ -44,6 +45,7 @@ interface ProductFormData {
     name: string;
     category_id: number | '';
     price: number | '';
+    stock: number | '';
     photos: File[];
     remove_photos: number[];
 }
@@ -94,6 +96,7 @@ export default function ProductsIndex({ products: initialProducts, categories, p
         name: '',
         category_id: '',
         price: '',
+         stock: '',
         photos: [],
         remove_photos: [],
     });
@@ -202,6 +205,7 @@ export default function ProductsIndex({ products: initialProducts, categories, p
             name: '',
             category_id: '',
             price: '',
+            stock: '',
             photos: [],
             remove_photos: [],
         });
@@ -261,6 +265,7 @@ export default function ProductsIndex({ products: initialProducts, categories, p
         formDataToSend.append('name', formData.name);
         formDataToSend.append('category_id', formData.category_id.toString());
         formDataToSend.append('price', formData.price.toString());
+        formDataToSend.append('stock', formData.stock.toString());
 
         formData.photos.forEach((photo, index) => {
             formDataToSend.append(`photos[${index}]`, photo);
@@ -292,6 +297,7 @@ export default function ProductsIndex({ products: initialProducts, categories, p
         formDataToSend.append('name', formData.name);
         formDataToSend.append('category_id', formData.category_id.toString());
         formDataToSend.append('price', formData.price.toString());
+        formDataToSend.append('stock', formData.stock.toString());
 
         // Add new photos
         formData.photos.forEach((photo, index) => {
@@ -342,6 +348,7 @@ export default function ProductsIndex({ products: initialProducts, categories, p
             name: product.name,
             category_id: product.category_id,
             price: product.price,
+            stock: product.stock,
             photos: [],
             remove_photos: [],
         });
@@ -426,6 +433,20 @@ export default function ProductsIndex({ products: initialProducts, categories, p
                                         </SelectContent>
                                     </Select>
                                     {errors.category_id && <p className="text-sm text-red-600">{errors.category_id}</p>}
+                                </div>
+
+                                {/* Stock */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="stock">Stock</Label>
+                                    <Input
+                                        id="stock"
+                                        type="number"
+                                        value={formData.stock}
+                                        onChange={(e) => handleInputChange('stock', parseInt(e.target.value) || 0)}
+                                        placeholder="Enter stock quantity"
+                                        min="0"
+                                    />
+                                    {errors.stock && <p className="text-sm text-red-600">{errors.stock}</p>}
                                 </div>
 
                                 {/* Price */}
@@ -571,8 +592,9 @@ export default function ProductsIndex({ products: initialProducts, categories, p
                                 <CardTitle className="text-lg">{product.name}</CardTitle>
                                 <div className="flex items-center justify-between">
                                     <Badge variant="secondary">{product.category?.name}</Badge>
-                                    <span className="text-lg font-semibold text-green-600">{formatCurrency(product.price)}</span>
+                                    <p className="mt-1 text-sm text-gray-600">Stock: {product.stock}</p>
                                 </div>
+                                <span className="text-lg font-semibold text-green-600 pt-2">{formatCurrency(product.price)}</span>
                             </CardHeader>
 
                             <CardContent className="pt-0">
@@ -669,6 +691,20 @@ export default function ProductsIndex({ products: initialProducts, categories, p
                                     </SelectContent>
                                 </Select>
                                 {errors.category_id && <p className="text-sm text-red-600">{errors.category_id}</p>}
+                            </div>
+
+                            {/* Stock */}
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-stock">Stock</Label>
+                                <Input
+                                    id="edit-stock"
+                                    type="number"
+                                    value={formData.stock}
+                                    onChange={(e) => handleInputChange('stock', parseInt(e.target.value) || 0)}
+                                    placeholder="Enter stock quantity"
+                                    min="0"
+                                />
+                                {errors.stock && <p className="text-sm text-red-600">{errors.stock}</p>}
                             </div>
 
                             {/* Price */}

@@ -54,7 +54,16 @@ class CheckoutController extends Controller
 
       // Create order items and calculate subtotal
       foreach ($request->cart as $cartItem) {
-        $product = Product::findOrFail($cartItem['product']['id']);
+        $product = Product::where('id', $cartItem['product']['id'])->lockForUpdate()->first();
+
+        if ($product->stock < $cartItem['quantity']) {
+            DB::rollBack();
+            return response()->json([
+                'error' => "Stok untuk produk '{$product->name}' tidak mencukupi. Sisa stok: {$product->stock}"
+            ], 422);
+        }
+
+        $product->decrement('stock', $cartItem['quantity']);
 
         OrderItems::create([
           'order_id' => $order->id,
@@ -78,8 +87,8 @@ class CheckoutController extends Controller
         'payment_method' => 'midtrans',
       ]);
 
-      // Generate unique order ID for Midtrans (format: KASIR-{timestamp}-{payment_id})
-      $midtransOrderId = 'KASIR-' . time() . '-' . $payment->id;
+      // Generate unique order ID for Midtrans (format: LPOS-{timestamp}-{payment_id})
+      $midtransOrderId = 'LPOS-' . time() . '-' . $payment->id;
 
       // Prepare Midtrans transaction
       $params = [
@@ -89,7 +98,7 @@ class CheckoutController extends Controller
         ],
         'customer_details' => [
           'first_name' => $request->customer_name,
-          'email' => 'customer@kasirku.com',
+          'email' => 'customer@litepos.com',
           'phone' => '08123456789',
         ],
         'item_details' => array_merge(
@@ -182,6 +191,12 @@ class CheckoutController extends Controller
       $payment = Payment::where('transaction_id', $orderId)->firstOrFail();
       $order = $payment->order;
 
+      $restoreStock = function() use ($order) {
+          foreach ($order->orderItems as $item) {
+              Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+          }
+      };
+
       if ($transactionStatus == 'capture') {
         if ($paymentType == 'credit_card') {
           if ($fraudStatus == 'challenge') {
@@ -205,12 +220,15 @@ class CheckoutController extends Controller
       } elseif ($transactionStatus == 'deny') {
         $payment->update(['status' => 'failed']);
         $order->update(['status' => 'cancelled']);
+        $restoreStock();
       } elseif ($transactionStatus == 'expire') {
         $payment->update(['status' => 'failed']);
         $order->update(['status' => 'cancelled']);
+        $restoreStock();
       } elseif ($transactionStatus == 'cancel') {
         $payment->update(['status' => 'failed']);
         $order->update(['status' => 'cancelled']);
+        $restoreStock();
       }
 
       return response()->json(['status' => 'success']);

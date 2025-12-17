@@ -14,7 +14,7 @@ export default function PaymentError() {
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-background p-4">
-            <Head title="Pembayaran Gagal - Kasirku" />
+            <Head title="Pembayaran Gagal - LitePOS" />
 
             <Card className="w-full max-w-md text-center">
                 <CardHeader>

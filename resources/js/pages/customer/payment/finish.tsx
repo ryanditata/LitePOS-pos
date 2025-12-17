@@ -12,7 +12,7 @@ interface Props {
 export default function PaymentFinish({ order_id, status }: Props) {
     useEffect(() => {
         // Clear cart after successful payment
-        localStorage.removeItem('kasirku_cart');
+        localStorage.removeItem('litepos_cart');
     }, []);
 
     const goToOrderStatus = () => {
@@ -25,7 +25,7 @@ export default function PaymentFinish({ order_id, status }: Props) {
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-background p-4">
-            <Head title="Pembayaran Berhasil - Kasirku" />
+            <Head title="Pembayaran Berhasil - LitePOS" />
 
             <Card className="w-full max-w-md text-center">
                 <CardHeader>

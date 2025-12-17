@@ -31,6 +31,7 @@ interface Product {
     name: string;
     category_id: number;
     price: number;
+    stock: number;
     created_at: string;
     updated_at: string;
     category?: Category;
@@ -72,20 +73,20 @@ export default function CustomerIndex({ products: initialProducts, categories, p
 
     // Load cart from localStorage on mount
     useEffect(() => {
-        const savedCart = localStorage.getItem('kasirku_cart');
+        const savedCart = localStorage.getItem('litepos_cart');
         if (savedCart) {
             try {
                 setCart(JSON.parse(savedCart));
             } catch (error) {
                 console.error('Error loading cart from localStorage:', error);
-                localStorage.removeItem('kasirku_cart');
+                localStorage.removeItem('litepos_cart');
             }
         }
     }, []);
 
     // Save cart to localStorage whenever it changes
     useEffect(() => {
-        localStorage.setItem('kasirku_cart', JSON.stringify(cart));
+        localStorage.setItem('litepos_cart', JSON.stringify(cart));
     }, [cart]);
 
     // Update products when props change
@@ -206,8 +207,16 @@ export default function CustomerIndex({ products: initialProducts, categories, p
         setCart((prevCart) => {
             const existingItem = prevCart.find((item) => item.product.id === product.id);
             if (existingItem) {
+                if (existingItem.quantity >= product.stock) {
+                    alert('Stok tidak mencukupi untuk menambah item ini.');
+                    return prevCart;
+                }
                 return prevCart.map((item) => (item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item));
             } else {
+                if (product.stock <= 0) {
+                        alert('Stok Habis.');
+                        return prevCart;
+                }
                 return [...prevCart, { product, quantity: 1 }];
             }
         });
@@ -217,6 +226,14 @@ export default function CustomerIndex({ products: initialProducts, categories, p
         if (quantity <= 0) {
             removeFromCart(productId);
             return;
+        }
+
+        const cartItem = cart.find(item => item.product.id === productId);
+        if(cartItem) {
+                if (quantity > cartItem.product.stock) {
+                    alert(`Maksimal stok tersedia hanya ${cartItem.product.stock}`);
+                    return;
+                }
         }
 
         setCart((prevCart) => prevCart.map((item) => (item.product.id === productId ? { ...item, quantity } : item)));
@@ -244,13 +261,19 @@ export default function CustomerIndex({ products: initialProducts, categories, p
     };
 
     const goToCheckout = () => {
+        const hasStockIssues = cart.some(item => item.quantity > item.product.stock);
+        if (hasStockIssues) {
+            alert("Beberapa barang di keranjang melebihi stok yang tersedia. Mohon periksa kembali.");
+            return;
+        }
+
         console.log('Going to checkout with cart:', cart);
 
         // Save current cart to localStorage before navigation
-        localStorage.setItem('kasirku_cart', JSON.stringify(cart));
+        localStorage.setItem('litepos_cart', JSON.stringify(cart));
 
         // Verify cart was saved
-        const savedCart = localStorage.getItem('kasirku_cart');
+        const savedCart = localStorage.getItem('litepos_cart');
         console.log('Cart saved to localStorage:', savedCart);
 
         setIsCartModalOpen(false);
@@ -332,6 +355,7 @@ export default function CustomerIndex({ products: initialProducts, categories, p
                                                             variant="outline"
                                                             size="icon"
                                                             className="h-8 w-8"
+                                                            disabled={item.quantity >= item.product.stock}
                                                             onClick={() => updateCartItemQuantity(item.product.id, item.quantity + 1)}
                                                         >
                                                             <Plus className="h-4 w-4" />
@@ -405,6 +429,8 @@ export default function CustomerIndex({ products: initialProducts, categories, p
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {filteredProducts.map((product) => {
                         const quantityInCart = getProductQuantityInCart(product.id);
+                        const isOutOfStock = product.stock <= 0;
+                        const isMaxStockReached = quantityInCart >= product.stock;
 
                         return (
                             <Card key={product.id} className="overflow-hidden transition-shadow hover:shadow-lg">
@@ -463,13 +489,16 @@ export default function CustomerIndex({ products: initialProducts, categories, p
                                             <Button
                                                 variant="outline"
                                                 size="icon"
+                                                disabled={isMaxStockReached}
                                                 onClick={() => updateCartItemQuantity(product.id, quantityInCart + 1)}
                                             >
                                                 <Plus className="h-4 w-4" />
                                             </Button>
                                         </div>
                                     ) : (
-                                        <Button className="w-full" onClick={() => addToCart(product)}>
+                                        <Button className="w-full"
+                                            disabled={isOutOfStock}
+                                            onClick={() => addToCart(product)}>
                                             <Plus className="mr-2 h-4 w-4" />
                                             Tambah ke Keranjang
                                         </Button>

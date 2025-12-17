@@ -54,7 +54,7 @@ export default function CheckoutIndex() {
 
     // Load cart from localStorage on mount
     useEffect(() => {
-        const savedCart = localStorage.getItem('kasirku_cart');
+        const savedCart = localStorage.getItem('litepos_cart');
 
         if (savedCart) {
             try {
@@ -171,7 +171,7 @@ export default function CheckoutIndex() {
             if (response.ok) {
                 // Store order info in localStorage
                 localStorage.setItem(
-                    'kasirku_current_order',
+                    'litepos_current_order',
                     JSON.stringify({
                         order_id: data.order_id,
                         payment_id: data.payment_id,
@@ -190,7 +190,7 @@ export default function CheckoutIndex() {
                     window.snap.pay(data.snap_token, {
                         onSuccess: function (result: any) {
                             // Clear cart and redirect to order status
-                            localStorage.removeItem('kasirku_cart');
+                            localStorage.removeItem('litepos_cart');
                             router.visit(`/order/${data.order_id}/status`);
                         },
                         onPending: function (result: any) {

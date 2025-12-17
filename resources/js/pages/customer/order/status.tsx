@@ -134,7 +134,7 @@ export default function OrderStatus({ order: initialOrder }: Props) {
 
     const goHome = () => {
         // Clear order info from localStorage
-        localStorage.removeItem('kasirku_current_order');
+        localStorage.removeItem('litepos_current_order');
         router.visit('/');
     };
 
