@@ -286,19 +286,26 @@ export default function CustomerIndex({ products: initialProducts, categories, p
             <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div className="container mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl font-bold text-foreground">LitePOS</h1>
-                            <p className="text-muted-foreground">Pilih menu favorit Anda</p>
+                        <div className='w-30 h-auto hidden md:block'>
+                            <img src="/images/logo-navbar2.png" alt=""/>
+                        </div>
+                        <div className='w-10 h-auto md:hidden'>
+                            <img src="/images/logo-navbar.png" alt=""/>
+                        </div>
+
+                        <div className="relative w-60 md:w-80 lg:w-100">
+                            <SearchIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+                            <Input placeholder="Cari menu favorit Anda..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
                         </div>
 
                         {/* Cart Button */}
                         <Dialog open={isCartModalOpen} onOpenChange={setIsCartModalOpen}>
                             <DialogTrigger asChild>
-                                <Button className="relative">
-                                    <ShoppingCart className="mr-2 h-5 w-5" />
-                                    Keranjang
+                                <Button size="icon" className="relative rounded-full">
+                                    <ShoppingCart className="h-5 w-5" />
+                                    
                                     {getTotalItems() > 0 && (
-                                        <Badge className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full p-0">
+                                        <Badge className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full p-0 bg-[#F7931E]">
                                             {getTotalItems()}
                                         </Badge>
                                     )}
@@ -404,14 +411,9 @@ export default function CustomerIndex({ products: initialProducts, categories, p
             {/* Main Content */}
             <main className="container mx-auto px-4 py-6">
                 {/* Filters */}
-                <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-                    <div className="relative max-w-md">
-                        <SearchIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
-                        <Input placeholder="Cari menu..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
-                    </div>
-
+                <div className="mb-6 flex justify-end">
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                        <SelectTrigger className="w-[200px]">
+                        <SelectTrigger className="w-[150px]">
                             <SelectValue placeholder="Semua Kategori" />
                         </SelectTrigger>
                         <SelectContent>
