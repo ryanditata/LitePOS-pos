@@ -123,12 +123,16 @@ class OrderController extends Controller
     DB::beginTransaction();
 
     try {
-      // Calculate total amount
       $subtotalAmount = 0;
       $validatedItems = [];
 
       foreach ($request->items as $item) {
-        $product = Product::findOrFail($item['product_id']);
+        $product = Product::lockForUpdate()->findOrFail($item['product_id']); 
+        
+        if ($product->stock < $item['quantity']) {
+            throw new \Exception("Stok '{$product->name}' tidak mencukupi. Sisa: {$product->stock}");
+        }
+
         $subtotal = $product->price * $item['quantity'];
         $subtotalAmount += $subtotal;
 
@@ -147,11 +151,10 @@ class OrderController extends Controller
       // Create order
       $order = Order::create([
         'customer_name' => $request->customer_name,
-        'table_number' => $request->table_number ?? 0, // Default to 0 for admin orders
-        'status' => $request->status ?? 'pending', // Order status from admin input, default pending
+        'table_number' => $request->table_number ?? 0,
+        'status' => $request->status ?? 'pending',
       ]);
 
-      // Create order items
       foreach ($validatedItems as $item) {
         OrderItems::create([
           'order_id' => $order->id,
@@ -160,6 +163,8 @@ class OrderController extends Controller
           'price' => $item['price'],
           'subtotal' => $item['subtotal'],
         ]);
+
+        Product::where('id', $item['product_id'])->decrement('stock', $item['quantity']);
       }
 
       // Create payment record
@@ -167,14 +172,13 @@ class OrderController extends Controller
         'order_id' => $order->id,
         'amount' => $totalAmount,
         'payment_method' => $request->payment_method,
-        'status' => 'completed', // Admin orders are automatically completed
+        'status' => 'completed',
         'transaction_id' => 'ADMIN-' . time() . '-' . $order->id,
         'paid_at' => now(),
       ]);
 
       DB::commit();
 
-      // Return JSON response for AJAX requests
       if ($request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
         return response()->json([
           'success' => true,
@@ -183,21 +187,19 @@ class OrderController extends Controller
         ]);
       }
 
-      // Return Inertia response for regular requests
       return redirect()->route('orders.index')->with('success', 'Order berhasil dibuat!');
     } catch (\Exception $e) {
       DB::rollback();
 
-      // Return JSON error for AJAX requests
       if ($request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
         return response()->json([
           'success' => false,
-          'message' => 'Gagal membuat order: ' . $e->getMessage(),
+          'message' => $e->getMessage(),
           'errors' => ['general' => $e->getMessage()]
         ], 422);
       }
 
-      return redirect()->back()->withErrors(['error' => 'Gagal membuat order: ' . $e->getMessage()]);
+      return redirect()->back()->withErrors(['error' => $e->getMessage()]);
     }
   }
 
@@ -269,6 +271,9 @@ class OrderController extends Controller
     DB::beginTransaction();
 
     try {
+      foreach ($order->orderItems as $item) {
+          Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+      }
       // Delete order items
       $order->orderItems()->delete();
 

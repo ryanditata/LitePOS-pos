@@ -339,9 +339,18 @@ export default function OrdersIndex({ orders, products, filters }: Props) {
 
     // Cart functions
     const addToCart = (product: Product) => {
+        if (product.stock <= 0) {
+            alert('Stok produk ini habis!');
+            return;
+        }
+
         const existingItem = cart.find((item) => item.product_id === product.id);
 
         if (existingItem) {
+            if (existingItem.quantity + 1 > product.stock) {
+                alert(`Stok tidak mencukupi! Sisa stok: ${product.stock}`);
+                return;
+            }
             updateQuantity(product.id, existingItem.quantity + 1);
         } else {
             const newItem: CartItem = {
@@ -355,6 +364,13 @@ export default function OrdersIndex({ orders, products, filters }: Props) {
     };
 
     const updateQuantity = (productId: number, newQuantity: number) => {
+        const itemInCart = cart.find((item) => item.product_id === productId);
+
+        if (itemInCart && newQuantity > itemInCart.product.stock) {
+            alert(`Stok tidak mencukupi! Sisa stok hanya ${itemInCart.product.stock}`);
+            return;
+        }
+
         if (newQuantity <= 0) {
             removeFromCart(productId);
             return;
@@ -686,12 +702,24 @@ export default function OrdersIndex({ orders, products, filters }: Props) {
                                         </CardHeader>
                                         <CardContent>
                                             <div className="grid max-h-64 grid-cols-1 gap-4 overflow-y-auto md:grid-cols-2">
-                                                {filteredProducts.map((product) => (
+                                                {filteredProducts.map((product) => {
+                                                    const cartItem = cart.find((item) => item.product_id === product.id);
+                                                    const currentQty = cartItem ? cartItem.quantity : 0;
+
+                                                    const isOutOfStock = product.stock <= 0;
+                                                    const isMaxedOut = currentQty >= product.stock;
+                                                    const isDisabled = isOutOfStock || isMaxedOut;
+
+                                                    return (
                                                     <div
                                                         key={product.id}
-                                                        className="cursor-pointer rounded-lg border p-3 transition-colors hover:bg-gray-50 hover:text-black"
-                                                        onClick={() => addToCart(product)}
-                                                    >
+                                                            className={`rounded-lg border p-3 transition-colors ${
+                                                                isDisabled
+                                                                    ? ''
+                                                                    : 'cursor-pointer hover:bg-gray-50 hover:text-black' 
+                                                            }`}
+                                                            onClick={() => !isDisabled && addToCart(product)}
+                                                        >
                                                         <div className="flex items-center gap-3">
                                                             {product.photos.length > 0 ? (
                                                                 <img
@@ -706,6 +734,7 @@ export default function OrdersIndex({ orders, products, filters }: Props) {
                                                             )}
                                                             <div className="flex-1">
                                                                 <h4 className="text-sm font-medium">{product.name}</h4>
+                                                                <p className='text-xs text-gray-600'>Stock: {product.stock}</p>
                                                                 <p className="text-sm font-semibold text-green-600">
                                                                     {formatCurrency(product.price)}
                                                                 </p>
@@ -713,7 +742,8 @@ export default function OrdersIndex({ orders, products, filters }: Props) {
                                                             <PlusIcon className="h-4 w-4 text-gray-400" />
                                                         </div>
                                                     </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                         </CardContent>
                                     </Card>
@@ -758,6 +788,7 @@ export default function OrdersIndex({ orders, products, filters }: Props) {
                                                                     variant="outline"
                                                                     size="sm"
                                                                     className="h-6 w-6 p-0"
+                                                                    disabled={item.quantity >= item.product.stock}
                                                                     onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
                                                                 >
                                                                     <PlusIcon className="h-3 w-3" />

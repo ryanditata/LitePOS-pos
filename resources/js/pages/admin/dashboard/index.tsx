@@ -163,7 +163,7 @@ export default function Dashboard({
                     <Card className="md:col-span-3">
                         <CardHeader>
                             <CardTitle>Menu Terlaris</CardTitle>
-                            <CardDescription>5 produk dengan penjualan tertinggi hari ini</CardDescription>
+                            <CardDescription>5 produk dengan penjualan tertinggi</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-8">
