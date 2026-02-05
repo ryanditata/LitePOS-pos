@@ -154,8 +154,8 @@ npm run types
 ```
 litepos/
 ├── app/
-│   ├── Http/Controllers/        # Laravel controllers
-│   ├── Models/                  # Eloquent models
+│   ├── Http/Controllers/       # Laravel controllers
+│   ├── Models/                 # Eloquent models
 │   └── Providers/              # Service providers
 ├── database/
 │   ├── migrations/             # Database migrations
